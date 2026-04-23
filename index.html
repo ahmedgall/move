@@ -3,104 +3,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIXAA STREAM | المترجم الذكي</title>
+    <title>FIXAA STREAM | فخامة المشاهدة العربية</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #060606; color: #fff; overflow-x: hidden; }
-        #video-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .player-container { width: 100%; max-width: 1000px; position: relative; }
-        iframe { width: 100%; height: 60vh; border-radius: 15px; border: 2px solid #e11d48; }
-        .sub-control { background: rgba(225, 29, 72, 0.1); border: 1px dashed #e11d48; padding: 15px; border-radius: 12px; margin-bottom: 15px; width: 100%; max-width: 1000px; }
+        body { font-family: 'Cairo', sans-serif; background-color: #060606; color: #fff; scroll-behavior: smooth; overflow-x: hidden; }
+        .hero-gradient { background: linear-gradient(to top, #060606 10%, transparent 90%); }
+        .movie-card { transition: all 0.4s ease; cursor: pointer; position: relative; overflow: hidden; border-radius: 12px; }
+        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3); }
+        .actor-card:hover img { border-color: #e11d48; transform: scale(1.05); }
+        .category-btn.active { background: #e11d48; border-color: #e11d48; box-shadow: 0 0 15px rgba(225, 29, 72, 0.4); }
+        #video-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        iframe { width: 100%; max-width: 1100px; height: 70vh; border-radius: 20px; border: 2px solid rgba(225,29,72,0.3); box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
     <div id="video-overlay">
-        <div class="sub-control flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="text-right">
-                <h2 id="playing-title" class="font-bold text-rose-600">اسم الفيلم</h2>
-                <p class="text-[10px] text-zinc-400">إذا لم تعمل الترجمة التلقائية، حمل ملف (SRT) وارفعها هنا</p>
+        <div class="w-full max-w-[1100px] flex flex-wrap justify-between items-center mb-4 gap-4 bg-zinc-900/50 p-4 rounded-xl backdrop-blur-md">
+            <div>
+                <h2 id="playing-title" class="text-xl font-bold text-white truncate max-w-[300px]">جاري التحميل...</h2>
+                <p class="text-rose-500 text-[10px] font-bold">في حال عدم ظهور الترجمة للأجنبي، جرب تبديل السيرفر من علامة CC</p>
             </div>
-            
-            <div class="flex items-center gap-2">
-                <label class="bg-zinc-800 px-4 py-2 rounded-lg text-xs cursor-pointer hover:bg-zinc-700 transition">
-                    📁 رفع ملف ترجمة خارجي
-                    <input type="file" id="sub-file" accept=".srt,.vtt" class="hidden" onchange="handleSubtitle(this)">
-                </label>
-                <button onclick="closePlayer()" class="bg-rose-600 px-6 py-2 rounded-lg font-bold text-sm">إغلاق ×</button>
-            </div>
+            <div class="flex gap-2" id="server-list"></div>
+            <button onclick="closePlayer()" class="bg-rose-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-rose-700 transition">إغلاق ×</button>
         </div>
-
-        <div class="player-container">
-            <iframe id="video-iframe" src="" allowfullscreen></iframe>
-        </div>
-        
-        <div class="mt-4 flex gap-2" id="server-list"></div>
+        <iframe id="video-iframe" src="" allowfullscreen></iframe>
     </div>
 
-    <nav class="p-6 border-b border-white/5 flex justify-between items-center">
-        <h1 class="text-2xl font-black text-rose-600 italic">FIXAA<span class="text-white">STREAM</span></h1>
-        <p class="text-[10px] text-zinc-500 italic">نظام المترجم الخارجي v2.0</p>
+    <nav class="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-white/5 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <svg width="30" height="30" viewBox="0 0 100 100" class="italic">
+                <path d="M10 10 L90 10 L50 90 Z" fill="#e11d48"/>
+                <path d="M30 30 L70 30 L50 70 Z" fill="#fff"/>
+            </svg>
+            <h1 class="text-2xl font-black text-rose-600 tracking-tighter italic">FIXAA<span class="text-white">STREAM</span></h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="relative group">
+                <input type="text" id="search" placeholder="ابحث عن فيلم، مسلسل، أو ممثل..." 
+                       class="bg-zinc-900 border border-white/10 rounded-full px-12 py-2 text-xs focus:w-80 transition-all outline-none focus:border-rose-600">
+                <svg class="absolute right-4 top-2.5 opacity-40 group-focus:opacity-100 transition" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+            </div>
+        </div>
     </nav>
 
-    <main class="p-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6" id="grid"></main>
+    <div id="hero" class="relative h-[85vh] w-full flex items-end p-8 md:p-20 overflow-hidden">
+        <img id="hero-img" src="" class="absolute inset-0 w-full h-full object-cover -z-10 animate-pulse bg-zinc-900 transition-opacity duration-1000">
+        <div class="absolute inset-0 hero-gradient -z-10"></div>
+        <div class="max-w-3xl space-y-6">
+            <div class="flex items-center gap-3">
+                <span class="bg-rose-600 text-[10px] uppercase font-bold px-3 py-1 rounded-full">حصرياً على فيكساا</span>
+                <span id="hero-rating" class="text-yellow-500 font-bold text-sm"></span>
+            </div>
+            <h2 id="hero-title" class="text-5xl md:text-7xl font-black leading-tight italic"></h2>
+            <p id="hero-desc" class="text-gray-300 text-sm md:text-lg max-w-xl line-clamp-3 leading-relaxed">...</p>
+            <div class="flex gap-4 pt-4">
+                <button id="hero-play" class="bg-white text-black px-10 py-4 rounded-xl font-black hover:bg-rose-600 hover:text-white transition-all shadow-xl flex items-center gap-2 italic">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 22v-20l18 10-18 10z"/></svg>
+                    شاهد الآن 
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="px-6 py-6 overflow-x-auto no-scrollbar flex gap-4 sticky top-[73px] bg-[#060606] z-40 border-b border-white/5">
+        <button onclick="loadTrending(this)" class="category-btn active border border-white/10 px-8 py-2 rounded-xl whitespace-nowrap text-xs font-bold transition-all">الرئيسية</button>
+        <button onclick="loadArabicContent('movie', this)" class="category-btn border border-white/10 px-8 py-2 rounded-xl whitespace-nowrap text-xs font-bold transition-all">أفلام عربي</button>
+        <button onclick="loadArabicContent('tv', this)" class="category-btn border border-white/10 px-8 py-2 rounded-xl whitespace-nowrap text-xs font-bold transition-all">مسلسلات عربي</button>
+        <button onclick="loadGenre('28', this)" class="category-btn border border-white/10 px-8 py-2 rounded-xl whitespace-nowrap text-xs font-bold transition-all">أكشن (أجنبي)</button>
+        <button onclick="loadGenre('16', this)" class="category-btn border border-white/10 px-8 py-2 rounded-xl whitespace-nowrap text-xs font-bold transition-all">أنمي وكرتون</button>
+    </div>
+
+    <main class="px-6 py-12 space-y-16">
+        
+        <section id="actors-section">
+            <h3 class="text-xl font-bold mb-8 pr-4 border-r-4 border-rose-600 italic">نجوم السينما</h3>
+            <div id="actors-grid" class="flex gap-6 overflow-x-auto no-scrollbar pb-4">
+                </div>
+        </section>
+
+        <section id="content-section">
+            <h3 id="section-title" class="text-xl font-bold mb-8 pr-4 border-r-4 border-rose-600 italic">الأفلام الرائجة</h3>
+            <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 text-center">
+                </div>
+        </section>
+    </main>
 
     <script>
         const API_KEY = '551fccd1a3a8def119305ff94bb4e1d1';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+        const ORIG_IMG_URL = 'https://image.tmdb.org/t/p/original';
+        
+        // سيرفرات المشاهدة
         const SERVERS = [
             { name: 'سيرفر VIP (عربي)', url: 'https://vidsrc.cc/v2/embed/movie/' },
-            { name: 'سيرفر 2 (متعدد)', url: 'https://vidsrc.xyz/embed/movie/' }
+            { name: 'سيرفر الترجمة', url: 'https://vidsrc.to/embed/movie/' },
+            { name: 'سيرفر 3', url: 'https://vidsrc.me/embed/movie?tmdb=' }
         ];
+
         let currentMovieId = '';
 
-        // جلب الأفلام
-        async function fetchMovies() {
-            const res = await fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}&language=ar-SA`);
+        // البداية
+        async function init() {
+            // جلب الممثلين التريند أولاً
+            fetchTrendingActors();
+
+            const res = await fetch(`${BASE_URL}/trending/movie/day?api_key=${API_KEY}&language=ar-SA`);
             const data = await res.json();
-            document.getElementById('grid').innerHTML = data.results.map(m => `
-                <div onclick="openPlayer('${m.id}', '${m.title}')" class="cursor-pointer group">
-                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="rounded-xl group-hover:ring-2 ring-rose-600 transition">
-                    <h3 class="text-xs mt-2 font-bold truncate">${m.title}</h3>
+            const top = data.results[0];
+            
+            // تحديث الـ Hero
+            document.getElementById('hero-img').src = ORIG_IMG_URL + top.backdrop_path;
+            document.getElementById('hero-title').innerText = top.title;
+            document.getElementById('hero-desc').innerText = top.overview;
+            document.getElementById('hero-rating').innerText = "⭐ " + top.vote_average.toFixed(1);
+            document.getElementById('hero-play').onclick = () => openPlayer(top.id, top.title);
+            
+            renderGrid(data.results, 'movie');
+        }
+
+        // دالة جلب الممثلين التريند
+        async function fetchTrendingActors() {
+            const res = await fetch(`${BASE_URL}/trending/person/day?api_key=${API_KEY}&language=ar-SA`);
+            const data = await res.json();
+            const actorsGrid = document.getElementById('actors-grid');
+            actorsGrid.innerHTML = data.results.map(a => `
+                <div onclick="fetchActorWorks('${a.id}', '${a.name}')" class="actor-card flex-none text-center cursor-pointer group w-24">
+                    <img src="${a.profile_path ? IMG_URL + a.profile_path : 'https://via.placeholder.com/150'}" 
+                         class="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-4 border-white/5 transition-all mx-auto group-hover:border-rose-600">
+                    <p class="text-[10px] mt-2 font-bold truncate group-hover:text-rose-600">${a.name}</p>
                 </div>
             `).join('');
         }
 
-        window.openPlayer = (id, title) => {
-            currentMovieId = id;
-            document.getElementById('playing-title').innerText = title;
-            document.getElementById('video-overlay').style.display = 'flex';
+        // دالة جلب أعمال الممثل عند الضغط عليه
+        async function fetchActorWorks(actorId, actorName) {
+            document.getElementById('section-title').innerText = "أعمال النجم: " + actorName;
+            document.getElementById('actors-section').style.display = 'none'; // إخفاء قسم الممثلين مؤقتاً
             
+            const res = await fetch(`${BASE_URL}/person/${actorId}/movie_credits?api_key=${API_KEY}&language=ar-SA`);
+            const data = await res.json();
+            renderGrid(data.cast, 'movie');
+            window.scrollTo({top: 600, behavior: 'smooth'});
+        }
+
+        // جلب التريند (الكل)
+        async function loadTrending(btn) {
+            setActiveBtn(btn);
+            document.getElementById('section-title').innerText = "الأفلام الرائجة";
+            document.getElementById('actors-section').style.display = 'block'; // إظهار الممثلين
+            init();
+        }
+
+        // جلب المحتوى العربي (أفلام أو مسلسلات)
+        async function loadArabicContent(type, btn) {
+            setActiveBtn(btn);
+            document.getElementById('section-title').innerText = type === 'movie' ? "سينما عربية" : "مسلسلات عربية";
+            document.getElementById('actors-section').style.display = 'none'; // إخفاء الممثلين
+            
+            let url = `${BASE_URL}/discover/${type}?api_key=${API_KEY}&language=ar-SA&sort_by=popularity.desc&with_original_language=ar`;
+            const res = await fetch(url);
+            const data = await res.json();
+            renderGrid(data.results, type);
+        }
+
+        // جلب الأقسام الأجنبي
+        async function loadGenre(genreId, btn) {
+            setActiveBtn(btn);
+            document.getElementById('section-title').innerText = btn.innerText;
+            document.getElementById('actors-section').style.display = 'none'; // إخفاء الممثلين
+            
+            let url = `${BASE_URL}/discover/movie?api_key=${API_KEY}&language=ar-SA&sort_by=popularity.desc&with_genres=${genreId}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            renderGrid(data.results, 'movie');
+        }
+
+        // دالة عرض المحتوى في الجريد
+        function renderGrid(content, type) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = content.map(m => `
+                <div class="movie-card group" onclick="openPlayer('${m.id}', '${m.title || m.name}', '${type}')">
+                    <div class="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-xl shadow-black/50 border border-white/5">
+                        <img src="${m.poster_path ? IMG_URL + m.poster_path : 'https://via.placeholder.com/500x750'}" 
+                             class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+                            <button class="bg-rose-600 text-white w-full py-2 rounded-lg text-xs font-bold mb-2 flex items-center justify-center gap-1 italic">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M3 22v-20l18 10-18 10z"/></svg>
+                                شاهد الآن
+                            </button>
+                        </div>
+                        <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-[10px] font-bold text-yellow-500">⭐ ${m.vote_average ? m.vote_average.toFixed(1) : 'N/A'}</div>
+                    </div>
+                    <h3 class="mt-4 text-[11px] font-semibold truncate group-hover:text-rose-600 transition">${m.title || m.name}</h3>
+                    <p class="text-[9px] text-zinc-500 mt-1">${m.release_date || m.first_air_date ? (m.release_date || m.first_air_date).split('-')[0] : ''}</p>
+                </div>
+            `).join('');
+        }
+
+        // المشغل (Player)
+        window.openPlayer = (id, title, type) => {
+            currentMovieId = id;
+            document.getElementById('playing-title').innerText = "مشاهدة: " + title;
+            
+            // إنشاء أزرار السيرفرات
             const serverList = document.getElementById('server-list');
             serverList.innerHTML = SERVERS.map((s, idx) => `
-                <button onclick="changeServer('${s.url}', ${idx})" class="bg-zinc-800 text-[10px] px-4 py-2 rounded ${idx===0?'ring-1 ring-rose-600':''}">
+                <button onclick="changeServer('${s.url}', ${idx}, '${type}')" 
+                        class="srv-btn bg-zinc-800 text-[10px] px-3 py-1.5 rounded-lg hover:bg-rose-600 transition ${idx === 0 ? 'ring-2 ring-rose-600' : ''}">
                     ${s.name}
                 </button>
             `).join('');
-            
-            changeServer(SERVERS[0].url, 0);
+
+            changeServer(SERVERS[0].url, 0, type); // تشغيل السيرفر الأول تلقائياً
+            document.getElementById('video-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         };
 
-        window.changeServer = (url, idx) => {
-            // إضافة برامتر الترجمة العربية للسيرفر
-            document.getElementById('video-iframe').src = url + currentMovieId + "?sub_ar=1";
-        };
+        window.changeServer = (url, idx, type) => {
+            // تعديل الرابط للمسلسلات لو لزم الأمر (بعض السيرفرات تتطلب s1e1)
+            let finalUrl = url + currentMovieId + "?sub_ar=1";
+            if(type === 'tv' && url.includes('xyz')) finalUrl = url + currentMovieId + "-1-1"; // تجربة s1e1 لسيرفر xyz
 
-        // وظيفة المترجم الخارجي (شرح الطريقة)
-        function handleSubtitle(input) {
-            if (input.files && input.files[0]) {
-                alert("تم رفع ملف: " + input.files[0].name + "\n\nملحوظة للمطور مروان: السيرفرات الخارجية (Iframe) تمنع حقن ملفات ترجمة من خارج نطاقها لأسباب أمنية. أفضل طريقة هي الضغط على زرار CC داخل المشغل بعد رفع الملف.");
-                // تقنياً: لا يمكن دمج ملف من جهازك داخل Iframe لموقع آخر بسهولة
-                // الحل العملي هو استخدام سيرفر vidsrc.me لأنه يتيح خاصية تحميل ترجمة يدوية من داخل المشغل نفسه
-            }
-        }
+            document.getElementById('video-iframe').src = finalUrl;
+            document.querySelectorAll('.srv-btn').forEach((btn, i) => {
+                btn.style.boxShadow = i === idx ? '0 0 10px #e11d48' : 'none';
+            });
+        };
 
         window.closePlayer = () => {
             document.getElementById('video-overlay').style.display = 'none';
             document.getElementById('video-iframe').src = "";
+            document.body.style.overflow = 'auto';
         };
 
-        fetchMovies();
+        // دالة مساعدة لتفعيل الأزرار
+        function setActiveBtn(btn) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // البحث (Search) عند الضغط على Enter
+        document.getElementById('search').addEventListener('keypress', async (e) => {
+            if(e.key === 'Enter') {
+                const term = e.target.value;
+                if(term.length > 2) {
+                    // إخفاء الممثلين والـ Hero عند البحث
+                    document.getElementById('hero').style.display = 'none';
+                    document.getElementById('actors-section').style.display = 'none';
+                    document.getElementById('section-title').innerText = "نتائج البحث عن: " + term;
+
+                    // بحث مزدوج (أفلام ومسلسلات)
+                    const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${term}&language=ar-SA`);
+                    const data = await res.json();
+                    renderGrid(data.results.filter(i => i.media_type !== 'person'), 'movie'); // عرض الأفلام/المسلسلات فقط
+                } else {
+                    location.reload(); // إعادة تحميل الصفحة لو البحث فاضي
+                }
+            }
+        });
+
+        init();
     </script>
 </body>
 </html>

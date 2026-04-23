@@ -3,74 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIXAA STREAM | سينما العرب</title>
+    <title>FIXAA STREAM | فخامة السينما</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Cairo', sans-serif; background-color: #060606; color: #fff; scroll-behavior: smooth; overflow-x: hidden; }
         .hero-gradient { background: linear-gradient(to top, #060606 10%, transparent 90%); }
-        .movie-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
-        .movie-card:hover { transform: scale(1.05); }
-        .category-btn.active { background: #e11d48; border-color: #e11d48; box-shadow: 0 0 20px rgba(225, 29, 72, 0.5); }
-        #video-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 15px; }
-        iframe { width: 100%; max-width: 1100px; height: 70vh; border-radius: 15px; border: 1px solid rgba(225,29,72,0.3); background: #000; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .movie-card { transition: all 0.4s ease; cursor: pointer; position: relative; overflow: hidden; border-radius: 12px; }
+        .movie-card:hover { transform: translateY(-10px); box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3); }
+        .category-btn.active { background: #e11d48; border-color: #e11d48; box-shadow: 0 0 15px rgba(225, 29, 72, 0.4); }
+        #video-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        iframe { width: 100%; max-width: 1000px; height: 65vh; border-radius: 15px; border: 2px solid rgba(225,29,72,0.2); }
     </style>
 </head>
 <body>
 
     <div id="video-overlay">
-        <div class="w-full max-w-[1100px] flex flex-wrap justify-between items-center mb-4 gap-4 bg-zinc-900/50 p-4 rounded-xl backdrop-blur-md">
-            <div>
-                <h2 id="playing-title" class="text-lg font-bold text-white truncate max-w-[300px]">جاري التحميل...</h2>
-                <p class="text-rose-500 text-[10px] font-bold">⚠️ ملاحظة: لو الترجمة مظهرتش، فعلها من علامة CC داخل المشغل واختار Arabic</p>
+        <div class="w-full max-w-[1000px] flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <div class="text-right">
+                <h2 id="playing-title" class="text-xl font-bold text-white italic"></h2>
+                <p class="text-rose-500 text-[10px] mt-1 font-bold">💡 نصيحة: لو الترجمة مظهرتش، اضغط CC واختار Arabic</p>
             </div>
             <div class="flex gap-2" id="server-list"></div>
-            <button onclick="closePlayer()" class="bg-rose-600 text-white px-5 py-2 rounded-lg font-bold hover:bg-rose-700 transition text-sm">إغلاق ×</button>
+            <button onclick="closePlayer()" class="bg-rose-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-rose-700 transition shadow-lg">إغلاق ×</button>
         </div>
         <iframe id="video-iframe" src="" allowfullscreen></iframe>
     </div>
 
-    <nav class="fixed top-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-white/5 px-6 py-4 flex justify-between items-center">
+    <nav class="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-lg border-b border-white/5 px-6 py-4 flex justify-between items-center">
         <h1 class="text-2xl font-black text-rose-600 italic">FIXAA<span class="text-white">STREAM</span></h1>
-        <div class="relative">
-            <input type="text" id="search" placeholder="ابحث عن فيلم..." class="bg-zinc-900 border border-white/10 rounded-full px-10 py-2 text-xs focus:w-64 transition-all outline-none focus:border-rose-600">
-            <span class="absolute right-4 top-2">🔍</span>
-        </div>
+        <input type="text" id="search" placeholder="بحث سريع..." class="bg-zinc-900 border border-white/10 rounded-full px-6 py-2 text-xs focus:w-64 transition-all outline-none focus:border-rose-600">
     </nav>
 
-    <div id="hero" class="relative h-[80vh] w-full flex items-end p-8 md:p-20 overflow-hidden">
+    <div id="hero" class="relative h-[75vh] w-full flex items-end p-10 md:p-20 overflow-hidden">
         <img id="hero-img" src="" class="absolute inset-0 w-full h-full object-cover -z-10">
         <div class="absolute inset-0 hero-gradient -z-10"></div>
-        <div class="max-w-3xl space-y-4 mb-10">
-            <div id="hero-rating" class="text-yellow-500 font-bold"></div>
-            <h2 id="hero-title" class="text-4xl md:text-6xl font-black leading-tight"></h2>
-            <p id="hero-desc" class="text-gray-300 text-sm md:text-base line-clamp-2 max-w-xl"></p>
-            <button id="hero-play" class="bg-rose-600 text-white px-10 py-3 rounded-full font-bold hover:scale-105 transition shadow-lg shadow-rose-600/30">شاهد الآن</button>
+        <div class="max-w-3xl space-y-4 pb-10">
+            <h2 id="hero-title" class="text-5xl md:text-7xl font-black leading-tight italic"></h2>
+            <p id="hero-desc" class="text-gray-300 text-sm md:text-base line-clamp-3 leading-relaxed max-w-xl"></p>
+            <button id="hero-play" class="bg-rose-600 text-white px-10 py-3 rounded-full font-black hover:scale-105 transition-all shadow-xl shadow-rose-600/20 italic">▶ ابدأ المشاهدة</button>
         </div>
     </div>
 
-    <div class="px-6 py-4 overflow-x-auto no-scrollbar flex gap-4 sticky top-[72px] bg-[#060606] z-40 border-b border-white/5">
-        <button onclick="loadCategory('trending', this)" class="category-btn active border border-white/10 px-6 py-2 rounded-lg whitespace-nowrap text-xs font-bold transition">الكل</button>
-        <button onclick="loadCategory('28', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg whitespace-nowrap text-xs font-bold transition">أكشن</button>
-        <button onclick="loadCategory('16', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg whitespace-nowrap text-xs font-bold transition">أنمي</button>
-        <button onclick="loadCategory('27', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg whitespace-nowrap text-xs font-bold transition">رعب</button>
-        <button onclick="loadCategory('35', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg whitespace-nowrap text-xs font-bold transition">كوميدي</button>
+    <div class="px-6 py-4 overflow-x-auto flex gap-4 sticky top-[72px] bg-[#060606] z-40 border-b border-white/5">
+        <button onclick="loadCategory('trending', this)" class="category-btn active border border-white/10 px-6 py-2 rounded-lg text-xs font-bold transition">الرئيسية</button>
+        <button onclick="loadCategory('28', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg text-xs font-bold transition">أكشن</button>
+        <button onclick="loadCategory('16', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg text-xs font-bold transition">أنمي</button>
+        <button onclick="loadCategory('27', this)" class="category-btn border border-white/10 px-6 py-2 rounded-lg text-xs font-bold transition">رعب</button>
     </div>
 
     <main class="px-6 py-10">
-        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6"></div>
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 text-center"></div>
     </main>
 
     <script>
         const API_KEY = '551fccd1a3a8def119305ff94bb4e1d1';
         const BASE_URL = 'https://api.themoviedb.org/3';
         
-        // سيرفرات تدعم الترجمة العربي (vidsrc.cc هو الأقوى حالياً)
+        // سيرفرات محدثة وشغالة 2026
         const SERVERS = [
-            { name: 'سيرفر عربي VIP', url: 'https://vidsrc.cc/v2/embed/movie/' },
-            { name: 'سيرفر جودة عالية', url: 'https://vidsrc.to/embed/movie/' },
-            { name: 'سيرفر احتياطي', url: 'https://vidsrc.xyz/embed/movie/' }
+            { name: 'سيرفر الترجمة VIP', url: 'https://vidsrc.cc/v2/embed/movie/' },
+            { name: 'سيرفر جودة 4K', url: 'https://vidsrc.xyz/embed/movie/' },
+            { name: 'سيرفر احتياطي', url: 'https://vidsrc.me/embed/movie?tmdb=' }
         ];
 
         let currentMovieId = '';
@@ -83,9 +77,7 @@
             document.getElementById('hero-img').src = 'https://image.tmdb.org/t/p/original' + top.backdrop_path;
             document.getElementById('hero-title').innerText = top.title;
             document.getElementById('hero-desc').innerText = top.overview;
-            document.getElementById('hero-rating').innerText = "⭐ " + top.vote_average.toFixed(1);
             document.getElementById('hero-play').onclick = () => openPlayer(top.id, top.title);
-            
             renderMovies(data.results);
         }
 
@@ -103,13 +95,10 @@
             const grid = document.getElementById('grid');
             grid.innerHTML = movies.map(m => `
                 <div class="movie-card group" onclick="openPlayer('${m.id}', '${m.title}')">
-                    <div class="relative aspect-[2/3] rounded-xl overflow-hidden border border-white/5 shadow-lg">
-                        <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <span class="bg-rose-600 text-white p-2 rounded-lg text-[10px] font-bold">شاهد الآن</span>
-                        </div>
+                    <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-4">
+                        <p class="text-[10px] font-bold">${m.title}</p>
                     </div>
-                    <h3 class="mt-2 text-xs font-bold truncate">${m.title}</h3>
                 </div>
             `).join('');
         }
@@ -119,7 +108,7 @@
             document.getElementById('playing-title').innerText = title;
             const serverList = document.getElementById('server-list');
             serverList.innerHTML = SERVERS.map((s, idx) => `
-                <button onclick="changeServer('${s.url}', ${idx})" class="srv-btn bg-zinc-800 text-[10px] px-3 py-1.5 rounded hover:bg-rose-600 transition ${idx === 0 ? 'bg-rose-600' : ''}">
+                <button onclick="changeServer('${s.url}', ${idx})" class="srv-btn bg-zinc-800 text-[10px] px-3 py-1.5 rounded hover:bg-rose-600 transition ${idx === 0 ? 'ring-2 ring-rose-600' : ''}">
                     ${s.name}
                 </button>
             `).join('');
@@ -129,11 +118,10 @@
         };
 
         window.changeServer = (url, idx) => {
-            // إضافة sub_ar لمحاولة جلب الترجمة تلقائياً
-            const finalUrl = url + currentMovieId + (url.includes('?') ? '&sub_ar=1' : '?sub_ar=1');
-            document.getElementById('video-iframe').src = finalUrl;
+            // محاولة إجبار الترجمة العربية
+            document.getElementById('video-iframe').src = url + currentMovieId + "?sub_ar=1";
             document.querySelectorAll('.srv-btn').forEach((btn, i) => {
-                btn.classList.toggle('bg-rose-600', i === idx);
+                btn.style.boxShadow = i === idx ? '0 0 10px #e11d48' : 'none';
             });
         };
 

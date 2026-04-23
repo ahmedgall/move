@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فيكساا سينما | Fixaa Movies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #09090b; color: #fff; }
+        .movie-card:hover img { transform: scale(1.05); }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <h1 class="text-3xl font-extrabold text-rose-600">FIXAA <span class="text-white">MOVIES</span></h1>
+            <div class="relative w-full md:w-96">
+                <input type="text" id="search" placeholder="ابحث عن فيلم..." 
+                       class="w-full bg-zinc-900 border border-zinc-800 rounded-full px-6 py-3 outline-none focus:border-rose-600 transition">
+            </div>
+        </div>
+
+        <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            </div>
+    </div>
+
+    <script>
+        const API_KEY = '551fccd1a3a8def119305ff94bb4e1d1';
+        const BASE_URL = 'https://api.themoviedb.org/3';
+        const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+
+        // دالة لجلب الأفلام
+        async function fetchMovies(endpoint, query = '') {
+            const url = query 
+                ? `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}&language=ar-SA`
+                : `${BASE_URL}/trending/movie/week?api_key=${API_KEY}&language=ar-SA`;
+            
+            const res = await fetch(url);
+            const data = await res.json();
+            renderMovies(data.results);
+        }
+
+        // دالة لعرض الأفلام في الصفحة
+        function renderMovies(movies) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = movies.map(m => `
+                <div class="movie-card bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl transition duration-300">
+                    <div class="relative overflow-hidden aspect-[2/3]">
+                        <img src="${m.poster_path ? IMG_URL + m.poster_path : 'https://via.placeholder.com/500x750?text=No+Image'}" 
+                             class="w-full h-full object-cover transition duration-500">
+                        <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs text-yellow-500 font-bold">
+                            ⭐ ${m.vote_average.toFixed(1)}
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-sm truncate mb-1">${m.title}</h3>
+                        <p class="text-zinc-500 text-xs">${m.release_date ? m.release_date.split('-')[0] : 'قريباً'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // البحث عند الكتابة
+        document.getElementById('search').addEventListener('input', (e) => {
+            const term = e.target.value;
+            if(term.length > 2) {
+                fetchMovies('', term);
+            } else if(term.length === 0) {
+                fetchMovies(); // رجع التريند لو فضينا الخانة
+            }
+        });
+
+        // تشغيل أولي
+        fetchMovies();
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="mainHtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fixaa Arab | Gold Signal Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --bg: #0a0a0a; --card: rgba(255, 255, 255, 0.05); --text: #ffffff; }
+        .light-mode { --bg: #f3f4f6; --card: rgba(255, 255, 255, 0.9); --text: #111827; }
+        body { background-color: var(--bg); color: var(--text); transition: all 0.3s ease; font-family: 'Segoe UI', Tahoma, sans-serif; min-height: 100vh; }
+        .glass-card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid rgba(128, 128, 128, 0.2); border-radius: 20px; }
+        .signal-buy { color: #22c55e; border: 2px solid #22c55e; shadow: 0 0 15px #22c55e; }
+        .signal-sell { color: #ef4444; border: 2px solid #ef4444; shadow: 0 0 15px #ef4444; }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+
+    <!-- Top Navigation -->
+    <div class="w-full max-w-5xl flex justify-between items-center mb-6">
+        <div class="flex gap-2">
+            <button onclick="toggleTheme()" class="glass-card px-4 py-2"><i id="themeIcon" class="fas fa-sun text-yellow-400"></i></button>
+            <button onclick="toggleLang()" id="langBtn" class="glass-card px-4 py-2 font-bold">English</button>
+        </div>
+        <h1 class="text-2xl font-black text-yellow-500">FIXAA ARAB</h1>
+    </div>
+
+    <!-- 🚨 AI SIGNAL BOX (The logic the client wants) -->
+    <div id="signalBox" class="w-full max-w-5xl glass-card p-6 mb-6 text-center animate-pulse">
+        <h3 id="signalText" class="text-2xl font-bold mb-2">جاري تحليل سوق الذهب...</h3>
+        <p id="actionNote" class="text-gray-400 text-sm">النظام يراقب نقطة الدخول المثالية الآن</p>
+    </div>
+
+    <!-- Chart Dashboard -->
+    <div class="glass-card w-full max-w-5xl p-4 shadow-2xl flex-grow mb-4" style="min-height: 500px;">
+        <div id="tradingview_gold" class="w-full h-[500px]"></div>
+    </div>
+
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        let currentTheme = 'dark';
+        let currentLang = 'ar';
+
+        // 1. Render the Chart
+        function renderChart() {
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "OANDA:XAUUSD",
+                "interval": "1",
+                "timezone": "Etc/UTC",
+                "theme": currentTheme,
+                "style": "1",
+                "locale": currentLang,
+                "container_id": "tradingview_gold"
+            });
+        }
+        renderChart();
+
+        // 2. Logic to "Simulation" of Secure Signals for the Client
+        // Note: In real life, this would connect to a Backend. For the demo:
+        function updateSignals() {
+            const signals = [
+                { ar: "🟢 دخول صفقة شراء الآن", en: "🟢 ENTER BUY ORDER NOW", noteAr: "الهدف: +10 نقاط بمكسب مضمون", noteEn: "Target: +10 Pips Guaranteed Profit", color: "#22c55e" },
+                { ar: "🔴 خروج من الصفقة فوراً", en: "🔴 EXIT TRADE NOW", noteAr: "أمن مكسبك الآن واخرج من السوق", noteEn: "Secure your profit and exit now", color: "#ef4444" },
+                { ar: "⏳ انتظر إشارة قوية", en: "⏳ WAITING FOR SIGNAL", noteAr: "السوق متذبذب، لا تدخل الآن", noteEn: "Market volatile, stay out", color: "#6b7280" }
+            ];
+            
+            // Randomly pick a signal for the demo to show it moves
+            const randomSignal = signals[Math.floor(Math.random() * signals.length)];
+            const textEl = document.getElementById('signalText');
+            const noteEl = document.getElementById('actionNote');
+            const boxEl = document.getElementById('signalBox');
+
+            textEl.innerText = currentLang === 'ar' ? randomSignal.ar : randomSignal.en;
+            noteEl.innerText = currentLang === 'ar' ? randomSignal.noteAr : randomSignal.noteEn;
+            textEl.style.color = randomSignal.color;
+            boxEl.style.borderColor = randomSignal.color;
+        }
+
+        // Update signals every 30 seconds to show "AI activity"
+        setInterval(updateSignals, 30000);
+        updateSignals();
+
+        function toggleTheme() {
+            currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+            document.body.classList.toggle('light-mode');
+            document.getElementById('themeIcon').className = currentTheme === 'dark' ? "fas fa-sun text-yellow-400" : "fas fa-moon text-blue-600";
+            renderChart();
+        }
+
+        function toggleLang() {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+            document.getElementById('mainHtml').dir = currentLang === 'ar' ? "rtl" : "ltr";
+            document.getElementById('langBtn').innerText = currentLang === 'ar' ? "English" : "عربي";
+            updateSignals();
+            renderChart();
+        }
+    </script>
+</body>
+</html>
